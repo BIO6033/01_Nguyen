@@ -1,0 +1,74 @@
+---
+title: "À Montréal, est-ce qu'il y a plus de collisions routières à l'aube?"
+author: "Jonathan Nguyen"
+date: "26/09/2019"
+output: 
+  html_document:
+    keep_md: true
+  
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load_packages, message = FALSE}
+library(tidyverse)
+```
+# Introduction
+
+[Une analyse](https://www.japantimes.co.jp/news/2017/09/14/national/rate-fatal-accidents-twilight-prompts-police-urge-drivers-turn-headlights-earlier/#.XZKZykZKjD4) de l'Agence de nationale de police au Japan rapporte que 13,1 % des collisions routières fatales ont au lieu à l'aube, soit entre 17 h et 20 h. Ce projet visera donc à voir si le cas est similaire à Montréal avec une hypothèse similaire : il y a plus de collisions routières à l'aube.
+
+# Le jeu de données
+
+Le jeu de données s'intitule ["Collisions routières"](http://donnees.ville.montreal.qc.ca/dataset/collisions-routieres) et est disponible sur le site web de la ville de Montréal. Celui-ci détaille les collisions routières survenues à Montréal, excluant le réseau autoroutier, entre 2012 et 2018, et ayant fait l'objet d'un rapport de police (SPVM). Il s'agirait d'un sous-ensemble d'un autre jeu de données provenant de la SAAQ.
+
+# Traitement des données
+
+## Tidy Data avec tidyr
+Le principe du Tidy Data comporte trois règles
+<br> 1. Chaque variable doit avoir sa propre colonne.
+<br> 2. Chaque Observation doit avoir sa propre rangée.
+<br> 3. Chaque valeur doit avoir sa propre cellule.
+
+Ces dernières sont respectées dans "Collisions routières" comme il est possible de voir ci-dessous, alors aucune modification majeure avec tidyr ne sera nécessaire avant la visualisation.
+
+```{r tidyr}
+collisions_read <- read_csv("accidents_2012_2018.csv")
+collisions_select <- select(collisions_read, NO_SEQ_COLL, DT_ACCDN, HR_ACCDN, everything()) #permet de mettre en valeur les variables permettant de répondre à la question
+collisions_select
+```
+
+## La visualisation avec ggplot
+
+### La gestion des valeurs manquantes
+Avant de visualiser les données, on remarque que pour 16 254 des accidents, l'heure n'est pas indiquée. Il faudra donc transformer les "Non précisé" en Na et par la suite les exclure de la visualisation. Pour faire cela, les fonctions mutate(), filter() et in.na() ont été utilisées.
+
+### Le choix du geom
+Geom_bar a été utilisé pour visualiser les données parce que l'heure de l'accident était entrée dans le jeu de données comme une valeur discrète, alors aucune précision ne serait gagnée avec la conversion en valeur continue pour tracer un histogramme. Les observation entre 17h et 20h a été mises en rouge pour mieux les distinguer.
+
+```{r ggplot}
+collisions <- read_csv("accidents_2012_2018.csv")
+count(collisions, HR_ACCDN == "Non précisé")
+collisions_1 <- collisions %>%
+  mutate(HR_ACCDN = ifelse(HR_ACCDN == "Non précisé", NA, HR_ACCDN)) %>% #remplace 'non précisé' dans le jeu de données avec NA
+  filter(!is.na(HR_ACCDN)) #permet de filtrer NA et faire le graphique seulement avec des valeurs qui existent
+
+ggplot(data = collisions_1,(mapping = aes(x = HR_ACCDN, fill = HR_ACCDN))) + 
+  geom_bar() +
+  labs(title = "Le nombre de collisions routières à Montréal selon l'heure (2012-2018)", fill = "Heure de la collsion", x = "Heure", y = "Nombre de collisions") +
+  theme(axis.text.x=element_blank(),axis.ticks.x=element_blank(), legend.position = "bottom", legend.title = element_blank()) + #nettoyage de l'axe des x
+  geom_text(aes(label = stat(count)), stat = 'count') + #permet de connaître plus facilement le nombre de collisions
+  scale_fill_manual(values = c("grey","grey","grey","darkgrey","grey","grey","grey","darkgrey","grey","grey","grey","darkgrey","grey","grey","grey","darkgrey","grey","red","red","red","grey","grey", "grey","darkgrey"))  #permet de mettre valeur les observations de 17h à 20h
+  
+```
+
+Ainsi, il est possible de voir que le pic dans le nombre d'accidents a lieu entre 15h et 18h, alors il y a un léger décalage avec ce que notre hypothèse de départ proposait.
+
+
+# Bibliographie
+
+R for Data Science de Wickham et Grolemund
+https://stackoverflow.com/questions/36048033/manually-colouring-plots-with-scale-fill-manual-in-ggplot2-not-working
+https://www.rdocumentation.org/packages/plyr/versions/1.8.4/topics/count
+
+
