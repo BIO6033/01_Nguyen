@@ -68,7 +68,7 @@ Ainsi, il est possible de voir que le pic dans le nombre d'accidents a lieu entr
 
 # Bibliographie
 
-R for Data Science de Wickham et Grolemund
+R for Data Science
 https://stackoverflow.com/questions/36048033/manually-colouring-plots-with-scale-fill-manual-in-ggplot2-not-working
 https://www.rdocumentation.org/packages/plyr/versions/1.8.4/topics/count
 
