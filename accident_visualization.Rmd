@@ -61,6 +61,7 @@ ggplot(data = collisions_1,(mapping = aes(x = HR_ACCDN, fill = HR_ACCDN))) +
   scale_fill_manual(values = c("grey","grey","grey","darkgrey","grey","grey","grey","darkgrey","grey","grey","grey","darkgrey","grey","grey","grey","darkgrey","grey","red","red","red","grey","grey", "grey","darkgrey"))  #permet de mettre valeur les observations de 17h à 20h
   
 ```
+# Conclusion
 
 Ainsi, il est possible de voir que le pic dans le nombre d'accidents a lieu entre 15h et 18h, alors il y a un léger décalage avec ce que notre hypothèse de départ proposait.
 
